@@ -14,10 +14,7 @@ void forward() {
   digitalWrite(IN3_R, HIGH);
   digitalWrite(IN4_R, LOW);
 
-  analogWrite(ENA_F, 200);
-  analogWrite(ENB_F, 200);
-  analogWrite(ENA_R, 200);
-  analogWrite(ENB_R, 200);
+  analogWrite(ENA_ALL, 200);
 }
 
 void turnLeft() {
@@ -34,15 +31,9 @@ void turnLeft() {
   digitalWrite(IN3_R, HIGH);
   digitalWrite(IN4_R, LOW);
 
-  analogWrite(ENA_F, 200);
-  analogWrite(ENB_F, 200);
-  analogWrite(ENA_R, 200);
-  analogWrite(ENB_R, 200);
+  analogWrite(ENA_ALL, 200);
 }
 
 void stopMotors() {
-  analogWrite(ENA_F, 0);
-  analogWrite(ENB_F, 0);
-  analogWrite(ENA_R, 0);
-  analogWrite(ENB_R, 0);
+  analogWrite(ENA_ALL, 0);
 }
