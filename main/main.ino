@@ -1,4 +1,6 @@
 #include "movement.c"
+#include <SoftwareSerial.h>
+SoftwareSerial BT(2, 3);
 
 void setup() {
 
