@@ -20,9 +20,14 @@ void setup() {
 
 
 
-void loop() {
-  turnLeft();
-  delay(1200);
-  stopMotors();
-  delay(1000);
-}
+//     case 1:
+//       // code for result == 2
+//       turnLeft();
+//       break;
+
+//     default:
+//       // code if none of the above match
+//       forward();
+//       break;
+//   }
+// }
