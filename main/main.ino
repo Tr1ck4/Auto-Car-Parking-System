@@ -1,13 +1,5 @@
 #include "movement.c"
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 #include "sensor.c"
-#include <SoftwareSerial.h>
-SoftwareSerial BT(2, 3);
-=======
-#include "infra.c"
->>>>>>> Stashed changes
-=======
 #include "infra.c"
 >>>>>>> Stashed changes
 
