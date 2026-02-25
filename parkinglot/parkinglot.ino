@@ -1,5 +1,5 @@
 #include <SoftwareSerial.h>
-SoftwareSerial BT(2, 3);
+// SoftwareSerial BT(2, 3);
 
 //uint8_t use for save space
 uint8_t pk_info[4] = {0, 0, 0, 0};//set of flags to illustrate occupy situation
@@ -7,13 +7,16 @@ String buffer = "";
 
 void setup(){
   Serial.begin(9600);
-  BT.begin(9600);
+  // BT.begin(38400);
+  Serial.println("1");
+
 
 }
 
 void loop(){
-  while(BT.available()) {
-    char c = BT.read();
+  //Serial.println("1");
+  while(Serial.available()) {
+    char c = Serial.read();
     if(c == '\n'){
       buffer.trim();
       String header = getHeader(buffer);
@@ -22,6 +25,7 @@ void loop(){
       //below is the block to handle messages
       if(header == "req"){
         send_pk_information();
+        Serial.println("1");
       }
       else if(header == "ocp"){
         if(pk_info[payload.toInt()]!=1){
@@ -36,6 +40,7 @@ void loop(){
       buffer += c;
     }
   }
+  
 
   
 }
@@ -43,7 +48,7 @@ void loop(){
 void send_pk_information(){
   for(int i = 0;i<sizeof(pk_info);i++){
     if(pk_info[i]==0){
-      BT.write((uint8_t)(i + 1));
+      Serial.print((uint8_t)(i + 1));
       break;
       }
   }

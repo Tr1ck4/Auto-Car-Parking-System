@@ -1,4 +1,5 @@
 #include "movement.c"
+#include "sensor.c"
 #include <SoftwareSerial.h>
 SoftwareSerial BT(2, 3);
 
