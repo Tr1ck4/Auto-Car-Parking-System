@@ -1,7 +1,5 @@
 #include "movement.c"
-#include "sensor.c"
 #include "infra.c"
->>>>>>> Stashed changes
 
 void setup() {
   Serial.begin(9600);
