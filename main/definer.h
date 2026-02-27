@@ -11,10 +11,3 @@
 
 #define IN3_F  9
 #define IN4_F  8
-
-// REAR L298N
-#define IN1_R  11
-#define IN2_R  10
-
-#define IN3_R  12
-#define IN4_R  13
