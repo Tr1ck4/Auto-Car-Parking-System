@@ -1,59 +1,63 @@
 #include "movement.c"
 #include "infra.c"
 
+int last = 3;
+bool turning = false;
+int incoming = [0,0,1];
+int pointer = 0;
+
 void setup() {
   Serial.begin(9600);
-  pinMode(ENA_ALL, OUTPUT);
-  
+
   pinMode(IN1_F, OUTPUT);
   pinMode(IN2_F, OUTPUT);
   pinMode(IN3_F, OUTPUT);
   pinMode(IN4_F, OUTPUT);
+  pinMode(ENA_LEFT, OUTPUT);
+  pinMode(ENA_RIGHT, OUTPUT);
 
   pinMode(Pin_left_ir, INPUT);
   pinMode(Pin_right_ir, INPUT);
+
+  digitalWrite(IN1_F,LOW);
+  digitalWrite(IN2_F,LOW);
+  digitalWrite(IN3_F,LOW);
+  digitalWrite(IN4_F,LOW);
 }
 
 void loop() {
-  // turnLeft();
-  // delay(1200);
-  // stopMotors();
-  // delay(1000);
-  int L = digitalRead(Pin_left_ir);
-  int R = digitalRead(Pin_right_ir);
-  Serial.print(L);
-  Serial.print(" ");
-  Serial.println(R);
-  int result = detech_line();
-  // Serial.println(result);
+  int result = detect_line();
+  Serial.println(result);
+  // if (result != 0){
+  //   analogWrite(ENA_RIGHT, 255);
+  //   analogWrite(ENA_LEFT, 255);
+  // }
   switch (result) {
-    case 0:
-      stopMotors();
+    case 3: // No line detected (Lost)
+      // Optional: keep moving slow or stop
+      analogWrite(ENA_RIGHT, 255);
+      analogWrite(ENA_LEFT, 255);
+      forward();
       break;
 
-    case 2:
-      // code for result == 1
-      turnRight();
-      break;
-
-    case 1:
-      // code for result == 2
+    case 1: // Left sensor on line
       turnLeft();
       break;
 
-    default:
-      // code if none of the above match
-      forward();
+    case 2: // Right sensor on line
+      turnRight();
+      break;
+
+    case 0: // Intersection (Both sensors on line)
+      if (incoming[pointer] == 1){
+        turnRight();
+        delay(2000); // play with the time
+        pointer++;
+      }
+      else{
+        forward();
+        delay(400); // base on distance for the sloot
+      }
       break;
   }
 }
-
-// void loop(){
-//   //backward
-//   digitalWrite(IN1_F, HIGH);
-//   digitalWrite(IN2_F, LOW);
-//   digitalWrite(IN3_F, HIGH);
-//   digitalWrite(IN4_F, LOW);
-
-//   // analogWrite(ENA_ALL, 255);
-// }

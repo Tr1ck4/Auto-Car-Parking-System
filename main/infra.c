@@ -1,8 +1,9 @@
 #include "infra.h"
 
-int detech_line() {
+int detect_line() {
   int L = digitalRead(Pin_left_ir);
   int R = digitalRead(Pin_right_ir); //high->not detect line; low->detect line
+  
 
   if (L == HIGH && R == HIGH) {
     return 0;   // both didnt detect line

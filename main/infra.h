@@ -1,3 +1,3 @@
 #include "definer.h"
 
-int detech_line();
+int detect_line();
