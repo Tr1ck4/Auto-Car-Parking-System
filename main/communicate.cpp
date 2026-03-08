@@ -10,8 +10,6 @@ void occupySlot(int slot) {
   Serial.println(slot);
 }
 
-
-
 void receiveParkingMessage() {
 
   while (Serial.available()) {

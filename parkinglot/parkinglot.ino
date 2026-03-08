@@ -1,79 +1,172 @@
-#include <SoftwareSerial.h>
-// SoftwareSerial BT(2, 3);
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
 
-//uint8_t use for save space
-uint8_t pk_info[4] = {0, 0, 0, 0};//set of flags to illustrate occupy situation
-String buffer = "";
+// WiFi hotspot information (phone hotspot)
+const char* WIFI_SSID     = "vivo X200 Pro";
+const char* WIFI_PASSWORD = "xiaolian";
 
-void setup(){
-  Serial.begin(9600);
-  // BT.begin(38400);
-  Serial.println("1");
+// MQTT broker information (IP address of your laptop)
+const char* MQTT_HOST = "192.168.155.109";
+const uint16_t MQTT_PORT = 1883;
+
+// MQTT client ID (must be unique in the broker)
+const char* MQTT_CLIENT_ID = "esp8266-parking";
+
+// MQTT topic used for communication
+const char* TOPIC = "lab/parking";
+
+// Create WiFi client and MQTT client
+WiFiClient wifiClient;
+PubSubClient mqtt(wifiClient);
 
 
+// Parking slot state array
+// 0 = free
+// 1 = occupied
+//2 = omw
+int parkingSlots[] = {1, 0, 1, 0, 0, 1, 1, 0};
+String instructions[] = {"1","01","001","0001","00001","000001","0000001","00000001"};
+
+// Calculate the number of parking slots
+const int SLOT_COUNT = sizeof(parkingSlots) / sizeof(parkingSlots[0]);
+
+
+// Function to connect to WiFi
+void connectWiFi() {
+
+  // Set ESP8266 to station mode
+  WiFi.mode(WIFI_STA);
+
+  // Start connecting to the WiFi network
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  // Wait until the connection is established
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(300);
+    Serial.print(".");
+  }
+
+  Serial.println();
+  Serial.println("[WIFI] Connected");
 }
 
-void loop(){
-  //Serial.println("1");
-  while(Serial.available()) {
-    char c = Serial.read();
-    if(c == '\n'){
-      buffer.trim();
-      String header = getHeader(buffer);
-      String payload = getPayload(buffer);
 
-      //below is the block to handle messages
-      if(header == "req"){
-        send_pk_information();
-        Serial.println("1");
-      }
-      else if(header == "ocp"){
-        if(pk_info[payload.toInt()]!=1){
-          pk_info[payload.toInt()-1]=1;
-        }
-      }
+// Function to connect to the MQTT broker
+void connectMQTT() {
 
+  mqtt.setServer(MQTT_HOST, MQTT_PORT);
 
-      buffer = "";
+  while (!mqtt.connected()) {
+    Serial.println("[MQTT] Connecting...");
 
-    }else{
-      buffer += c;
+    if (mqtt.connect(MQTT_CLIENT_ID)) {
+      mqtt.subscribe(TOPIC);
+      Serial.println("[MQTT] Connected and subscribed");
+    } else {
+      Serial.print("[MQTT] Failed, rc = ");
+      Serial.println(mqtt.state());
+      delay(1000);
     }
   }
-  
-
-  
-}
-
-void send_pk_information(){
-  for(int i = 0;i<sizeof(pk_info);i++){
-    if(pk_info[i]==0){
-      Serial.print((uint8_t)(i + 1));
-      break;
-      }
-  }
-  
 }
 
 
-String getHeader(String msg) {
+// Function to find the nearest empty parking slot
+int findNearestEmptySlot() {
 
-  int pos = msg.indexOf(':'); 
+  // Scan the parkingSlots array from the beginning
+  for (int i = 0; i < SLOT_COUNT; i++) {
 
-  if (pos == -1) {
-    return msg;   
+    // If the slot is free
+    if (parkingSlots[i] == 0) {
+
+      // Return the slot index
+      return instructions[i];
+    }
   }
 
-  return msg.substring(0, pos); 
+  // If no empty slot exists, return -1
+  return -1;
 }
 
-String getPayload(String msg) {
 
-  int pos = msg.indexOf(':');  
+// MQTT callback function
+// This function is triggered whenever a message is received
+void mqttCallback(char* topic, byte* payload, unsigned int length) {
 
-  if (pos == -1) {
-    return "";   
+  // Convert MQTT payload to String
+  String msg;
+
+  for (unsigned int i = 0; i < length; i++) {
+    msg += (char)payload[i];
   }
 
-  return msg.substring(pos + 1); 
+  msg.trim();
+
+  Serial.print("[MQTT] Message arrived: ");
+  Serial.println(msg);
+
+
+  // Check whether the message is a parking request
+  // Request format: req+mqttid
+  if (msg.startsWith("req+")) {
+
+    // Extract the vehicle mqtt ID
+    String mqttid = msg.substring(4);
+    mqttid.trim();
+
+    // Find the nearest empty parking slot
+    int num = findNearestEmptySlot();
+
+    // Construct the response message
+    // Format: res+slotNumber+mqttid
+    String reply = "res+" + String(num) + "+" + mqttid;
+
+    // Publish the response
+    mqtt.publish(TOPIC, reply.c_str());
+
+    Serial.print("[PUB] ");
+    Serial.println(reply);
+  }
+}
+
+
+void setup() {
+
+  Serial.begin(115200);
+  delay(200);
+
+  Serial.println();
+  Serial.println("[BOOT] ESP8266 parking start");
+
+  // Connect to WiFi
+  connectWiFi();
+
+  // Set MQTT message callback function
+  mqtt.setCallback(mqttCallback);
+
+  // Connect to MQTT broker
+  connectMQTT();
+}
+
+
+void loop() {
+
+  // Reconnect WiFi if disconnected
+  if (WiFi.status() != WL_CONNECTED) {
+
+    Serial.println("[WIFI] Disconnected, reconnecting...");
+    connectWiFi();
+  }
+
+  // Reconnect MQTT if disconnected
+  if (!mqtt.connected()) {
+
+    Serial.println("[MQTT] Disconnected, reconnecting...");
+    connectMQTT();
+  }
+
+  // Keep MQTT client running
+  // This function processes incoming messages and maintains connection
+  mqtt.loop();
 }
