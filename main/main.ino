@@ -3,8 +3,13 @@
 
 int last = 3;
 bool turning = false;
-int incoming = [0,0,1];
+String incoming = "";
 int pointer = 0;
+
+void updateCommand(String cmd){
+  incoming = cmd;
+  pointer = 0;
+}
 
 void setup() {
   Serial.begin(9600);
@@ -28,10 +33,6 @@ void setup() {
 void loop() {
   int result = detect_line();
   Serial.println(result);
-  // if (result != 0){
-  //   analogWrite(ENA_RIGHT, 255);
-  //   analogWrite(ENA_LEFT, 255);
-  // }
   switch (result) {
     case 3: // No line detected (Lost)
       // Optional: keep moving slow or stop
@@ -48,16 +49,28 @@ void loop() {
       turnRight();
       break;
 
-    case 0: // Intersection (Both sensors on line)
-      if (incoming[pointer] == 1){
-        turnRight();
-        delay(2000); // play with the time
+    case 0: // Intersection
+      if(pointer < incoming.length()){
+        int command = incoming[pointer] - '0';  
+        if(command == 1){
+          while(detect_line() != 1){
+            turnRight();
+          }
+        }
+
+        else if(command == 2){
+          while(detect_line() != 2){
+            turnLeft();
+          }
+        }
+
+        else{
+          forward();
+          delay(400);
+        }
         pointer++;
       }
-      else{
-        forward();
-        delay(400); // base on distance for the sloot
-      }
       break;
+    
   }
 }
