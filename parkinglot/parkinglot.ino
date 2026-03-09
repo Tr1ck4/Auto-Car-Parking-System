@@ -72,7 +72,7 @@ void connectMQTT() {
 
 
 // Function to find the nearest empty parking slot
-int findNearestEmptySlot() {
+String findNearestEmptySlot() {
 
   // Scan the parkingSlots array from the beginning
   for (int i = 0; i < SLOT_COUNT; i++) {
@@ -86,7 +86,7 @@ int findNearestEmptySlot() {
   }
 
   // If no empty slot exists, return -1
-  return -1;
+  return "-1";
 }
 
 
@@ -116,18 +116,34 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     mqttid.trim();
 
     // Find the nearest empty parking slot
-    int num = findNearestEmptySlot();
+    String num = findNearestEmptySlot();
 
     // Construct the response message
     // Format: res+slotNumber+mqttid
-    String reply = "res+" + String(num) + "+" + mqttid;
+    String reply = "res+" + num + "+" + mqttid;
 
     // Publish the response
     mqtt.publish(TOPIC, reply.c_str());
 
     Serial.print("[PUB] ");
     Serial.println(reply);
+  }else if (msg.startsWith("update+")) {
+
+    String numStr = msg.substring(7);
+    numStr.trim();
+
+    int slotNum = numStr.toInt();
+
+    if (slotNum >= 0 && slotNum < SLOT_COUNT) {
+
+      parkingSlots[slotNum] = 1;
+
+      Serial.print("[UPDATE] slot ");
+      Serial.print(slotNum);
+      Serial.println(" set to occupied");
+    }
   }
+  
 }
 
 
