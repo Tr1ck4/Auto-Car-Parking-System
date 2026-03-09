@@ -1,13 +1,11 @@
 #include "movement.c"
 #include "infra.c"
-#include "communicate.c"
+#include "communicate.h"
 
 #include <SoftwareSerial.h>
 
 SoftwareSerial espSerial(10, 11); 
 
-int last = 3;
-bool turning = false;
 String incoming = "2";
 int pointer = 0;
 
@@ -18,8 +16,8 @@ void setup() {
   pinMode(IN2_F, OUTPUT);
   pinMode(IN3_F, OUTPUT);
   pinMode(IN4_F, OUTPUT);
-  pinMode(ENA_LEFT, OUTPUT);
-  pinMode(ENA_RIGHT, OUTPUT);
+  // pinMode(ENA_LEFT, OUTPUT);
+  // pinMode(ENA_RIGHT, OUTPUT);
 
   pinMode(Pin_left_ir, INPUT);
   pinMode(Pin_right_ir, INPUT);
@@ -30,15 +28,13 @@ void setup() {
   digitalWrite(IN4_F,LOW);
 
   espSerial.begin(9600);
+  requestParking();
+  receiveParkingMessage();
 }
 
 void loop() {
-  // if (espSerial.available()) {
-  //   incoming = espSerial.readStringUntil('\n');
-  //   Serial.println(incoming);  
-  // }
   int result = detect_line();
-  Serial.println(result);
+  // Serial.println(result);
   switch (result) {
     case 3: // No line detected (Lost)
       // Optional: keep moving slow or stop
@@ -61,44 +57,34 @@ void loop() {
 
     case 0: // Intersection
       if(pointer < incoming.length()){
-
         int command = incoming[pointer] - '0';
-
         if(command == 1){  // RIGHT
-
           // turn until right sensor finds line
           while(detect_line() != 1){
             turnRight();
           }
-
           // go forward until intersection finished
           while(detect_line() != 0){
             forward();
           }
+          // occupySlot(command);
         }
-
         else if(command == 2){  // LEFT
-
           while(detect_line() != 2){
             turnLeft();
           }
-
           while(detect_line() != 0){
             forward();
           }
+          // occupySlot(command);
         }
-
         else{  // STRAIGHT
-
           while(detect_line() != 0){
             forward();
           }
-
         }
-
         pointer++;
       }
-
       break;
   }
 }

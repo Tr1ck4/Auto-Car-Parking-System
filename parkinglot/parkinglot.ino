@@ -25,7 +25,7 @@ PubSubClient mqtt(wifiClient);
 // 1 = occupied
 //2 = omw
 int parkingSlots[] = {1, 0, 1, 0, 0, 1, 1, 0};
-String instructions[] = {"1","01","001","0001","00001","000001","0000001","00000001"};
+String instructions[] = {"2","02","002","0002","00002","000002","0000002","00000002"};
 
 // Calculate the number of parking slots
 const int SLOT_COUNT = sizeof(parkingSlots) / sizeof(parkingSlots[0]);
@@ -148,10 +148,7 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 
 
 void setup() {
-
-  Serial.begin(115200);
-  delay(200);
-
+  Serial.begin(9600);
   Serial.println();
   Serial.println("[BOOT] ESP8266 parking start");
 
