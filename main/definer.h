@@ -1,3 +1,6 @@
+#ifndef DEFINER_H
+#define DEFINER_H
+
 #define Pin_left_ir  12   
 #define Pin_right_ir 13
 
@@ -12,3 +15,5 @@
 #define ENA_RIGHT 10
 #define IN3_F  9
 #define IN4_F  8
+
+#endif
