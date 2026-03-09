@@ -60,11 +60,11 @@ void sendParkingRequest() {
 }
 
 void updateOccupied(int slotNum) {
-  String msg = "update+" + String(slotNum) + "+1";
+  String msg = "update+" + String(slotNum) /*+ "+1"*/;
   mqtt.publish(TOPIC, msg.c_str());
 
   //Serial.print("[PUB] ");
-  Serial.println(msg);
+  //Serial.println(msg);
 }
 
 void mqttCallback(char* topic, byte* payload, unsigned int length) {

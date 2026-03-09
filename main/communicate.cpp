@@ -10,7 +10,7 @@ void occupySlot(int slot) {
   Serial.println(slot);
 }
 
-void receiveParkingMessage() {
+void receiveParkingMessage(int *num,bool *ready) {
 
   while (Serial.available()) {
 
@@ -23,8 +23,8 @@ void receiveParkingMessage() {
       if (recvBuffer.startsWith("SLOT+")) {
 
         String numStr = recvBuffer.substring(5);
-        assignedSlot = numStr.toInt();
-        slotReady = true;
+        *num = numStr.toInt();
+        *ready = true;
       }
 
       recvBuffer = "";
