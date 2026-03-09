@@ -13,21 +13,13 @@ void occupySlot(int slot) {
   Serial.println(slot);
 }
 
-void receiveParkingMessage(int *num,bool *ready) {
+void receiveParkingMessage() {
+  if (Serial.available()) {
+    String msg = Serial.readStringUntil('\n');
+    msg.trim();
 
-  while (Serial.available()) {
-    char c = Serial.read();
-    if (c == '\n') {
-      recvBuffer.trim();
-      if (recvBuffer.startsWith("SLOT+")) {
-        String numStr = recvBuffer.substring(5);
-        *num = numStr.toInt();
-        *ready = true;
-      }
-      recvBuffer = "";
-    }
-    else if (c != '\r') {
-      recvBuffer += c;
-    }
+    Serial.print("Received: ");
+    Serial.println(msg);
   }
 }
+
