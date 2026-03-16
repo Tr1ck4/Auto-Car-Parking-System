@@ -34,3 +34,10 @@ void turnRight() {
   digitalWrite(IN4_F, LOW);
 }
 
+void stop(){
+  digitalWrite(IN1_F, LOW);
+  digitalWrite(IN2_F, LOW);
+  digitalWrite(IN3_F, LOW);
+  digitalWrite(IN4_F, LOW);
+}
+

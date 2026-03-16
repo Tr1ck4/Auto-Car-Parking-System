@@ -8,7 +8,7 @@
 
 String msg = "";
 int pointer = 0;
-
+bool isPark = false;
 void setup() {
   Serial.begin(9600);
 
@@ -31,62 +31,71 @@ void setup() {
 }
 
 void loop() {
-  while(msg == ""){
-    if (Serial.available()) {
-      msg = Serial.readStringUntil('\n');
-      msg.trim();
+  if (!isPark){
+    while(msg == ""){
+      if (Serial.available()) {
+        msg = Serial.readStringUntil('\n');
+        msg.trim();
+        msg = msg.substring(5);
 
-      Serial.print("Received: ");
-      Serial.println(msg);
-    }
-  }
-  
-  int result = detect_line();
-  // Serial.print(result);
-  switch (result) {
-    case 3: // No line detected (Lost)
-      // Optional: keep moving slow or stop
-      forward();
-      break;
-
-    case 1: // Left sensor on line
-      turnLeft();
-      break;
-
-    case 2: // Right sensor on line
-      turnRight();
-      break;
-
-    case 0: // Intersection
-      if(pointer < msg.length()){
-        int command = msg[pointer] - '0';
-        if(command == 1){  // RIGHT
-          // turn until right sensor finds line
-          while(detect_line() != 1){
-            turnRight();
-          }
-          // go forward until intersection finished
-          while(detect_line() != 0){
-            forward();
-          }
-          occupySlot(recvBuffer.length());
-        }
-        else if(command == 2){  // LEFT
-          while(detect_line() != 2){
-            turnLeft();
-          }
-          while(detect_line() != 0){
-            forward();
-          }
-          occupySlot(recvBuffer.length());
-        }
-        else{  // STRAIGHT
-          while(detect_line() != 0){
-            forward();
-          }
-        }
-        pointer++;
+        Serial.print("Received: ");
+        Serial.println(msg);
       }
-      break;
+    }
+
+    int result = detect_line();
+    Serial.println(result);
+    
+    switch (result) {
+      case 3: // No line detected (Lost)
+        // Optional: keep moving slow or stop
+        forward();
+        break;
+
+      case 1: // Left sensor on line
+        turnLeft();
+        break;
+
+      case 2: // Right sensor on line
+        turnRight();
+        break;
+
+      case 0: // Intersection
+        if(pointer < msg.length()){
+          int command = msg[pointer] - '0';\
+          Serial.println(msg[pointer]);
+          if(command == 2){  // RIGHT
+            // turn until right sensor finds line
+            while(detect_line() != 2){
+              turnRight();
+            }
+            // go forward until intersection finished
+            while(detect_line() != 0){
+              forward();
+            }
+            stop();
+            occupySlot(recvBuffer.length());
+            isPark = true;
+          }
+          else if(command == 1){  // LEFT
+            while(detect_line() != 1){
+              turnLeft();
+            }
+            while(detect_line() != 0){
+              forward();
+            }
+            stop();
+            occupySlot(recvBuffer.length());
+            isPark = true;
+          }
+          else{  // STRAIGHT
+            while(detect_line() != 0){
+              forward();
+            }
+          }
+          pointer++;
+        }
+        break;
+    }
   }
 }

@@ -4,5 +4,5 @@ void forward();
 void backward();
 void turnLeft();
 void turnRight();
-void switchMotors();
-int handleIntersection();
+void stop();
+// int handleIntersection();
